@@ -612,6 +612,8 @@ When finished, **stop** the script in Connect. The script sets **FIO4 LOW** so t
 |------|---------|
 | `plant/plant.ino` | Firmware — upload with Arduino IDE |
 | `arduino-plant.py` | Nominal Connect script (LabJack + streaming) |
+| `plant_tests.py` | Automated pass/fail tests (`TestWorkflow`) |
+| `TESTING.md` | How to add and run automated tests in Connect |
 | `README.md` | This guide |
 | `../app.connect` | Connect app layout, scripts, plots |
 
@@ -625,7 +627,7 @@ When finished, **stop** the script in Connect. The script sets **FIO4 LOW** so t
 - Command hardware from Nominal Connect (`system_on` → FIO4)  
 - Stream telemetry (`joystick_voltage`) to verify behavior  
 
-**Next ideas:** wire **VRy** to a second analog channel; use joystick **SW** as a digital input; stream Arduino USB serial in Python.
+**Next ideas:** run **`plant_tests.py`** as a Test Workflow ([TESTING.md](./TESTING.md)); wire **VRy** to a second analog channel; use joystick **SW** as a digital input.
 
 ---
 

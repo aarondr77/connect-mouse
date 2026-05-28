@@ -37,7 +37,7 @@ tiles:
     tile:
       layout: grid
       rows:
-      - height: 0.6756761
+      - height: 0.498286
         columns:
         - width: null
           tile:
@@ -65,13 +65,34 @@ tiles:
                 args: []
                 max_log_lines: 10000
               show_output_column: true
-      - height: 1.3243252
+      - height: 1.5017152
         columns:
-        - width: null
+        - width: 1.923137
           tile:
             layout: grid
             rows:
-            - height: null
+            - height: 0.9528159
+              columns:
+              - width: null
+                tile:
+                  layout: pane
+                  id: 6d116d28-3b84-490e-88b3-9168cbb78dde
+                  title: Test Workflow
+                  direction: vertical
+                  should_fill: true
+                  elements:
+                  - controls: test_workflow
+                    label: null
+                    script:
+                      id: plant-tests
+                      label: Plant Tests
+                      path: /Users/aarondiamond-reivich/Nominal/projects/project2/plant_tests.py
+                      args: []
+                      max_log_lines: 10000
+                    output_table:
+                      location: bottom
+                      columns: []
+            - height: 1.0471843
               columns:
               - width: null
                 tile:
@@ -92,56 +113,50 @@ tiles:
                         topic: script/project2/system_on
                         contents:
                           enabled: $system_on
+        - width: 0.07686243
+          tile:
+            layout: grid
+            rows:
             - height: null
               columns:
               - width: null
                 tile:
                   layout: pane
-                  id: 3728535c-cd3b-4d2c-b39f-c0e75f9f0a5d
-                  title: Table
+                  id: 98db6b85-1425-4d68-a9fb-6f9a1073f383
+                  title: Joystick voltage (V)
                   direction: vertical
                   should_fill: true
                   elements:
-                  - display: table
-                    script_id: arduino-plant
-        - width: null
-          tile:
-            layout: pane
-            id: 98db6b85-1425-4d68-a9fb-6f9a1073f383
-            title: Joystick voltage (V)
-            direction: vertical
-            should_fill: true
-            elements:
-            - plot: line
-              stream_id: joystick_voltage
-              channels:
-              - value
-              colors: []
-              legend_placement: bottom_left
-              x_format: timestamp
-              x_time_display: Local
-              x_scale: linear
-              y_scale: linear
-      - height: 1.0
-        columns:
-        - width: null
-          tile:
-            layout: pane
-            id: a1b2c3d4-e5f6-4789-a012-3456789abcde
-            title: System on / enable
-            direction: vertical
-            should_fill: true
-            elements:
-            - plot: line
-              stream_id: system_on
-              channels:
-              - value
-              colors: []
-              legend_placement: bottom_left
-              x_format: timestamp
-              x_time_display: Local
-              x_scale: linear
-              y_scale: linear
+                  - plot: line
+                    stream_id: joystick_voltage
+                    channels:
+                    - value
+                    colors: []
+                    legend_placement: bottom_left
+                    x_format: timestamp
+                    x_time_display: Local
+                    x_scale: linear
+                    y_scale: linear
+            - height: null
+              columns:
+              - width: null
+                tile:
+                  layout: pane
+                  id: a1b2c3d4-e5f6-4789-a012-3456789abcde
+                  title: System on / enable
+                  direction: vertical
+                  should_fill: true
+                  elements:
+                  - plot: line
+                    stream_id: system_on
+                    channels:
+                    - value
+                    colors: []
+                    legend_placement: bottom_left
+                    x_format: timestamp
+                    x_time_display: Local
+                    x_scale: linear
+                    y_scale: linear
 left_panel: null
 right_panel: null
 bottom_panel: null
