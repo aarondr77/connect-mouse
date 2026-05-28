@@ -1,0 +1,152 @@
+title: APP
+window_title: null
+logo_path: null
+timeline:
+  show: false
+  display: relative
+  pixels_per_tick: 0.0
+  milestones: []
+streaming:
+  buffer_size: 5000
+  timeline: null
+  playback_speed: null
+  window: null
+  persistence:
+  - enabled: 'true'
+    data_source_rid: null
+    file_path: null
+    streams: []
+  channels:
+  - channel: ain0.value
+  - channel: system_on.value
+  - channel: joystick_voltage.value
+    unit: V
+  - channel: enable_out.value
+python:
+  packages:
+  - nominal-instro[daq]
+  - nominal
+  wheelhouse: null
+on_load: null
+on_unload: null
+tiles:
+- layout: tabs
+  tabs:
+  - title: Untitled Tab
+    allow_popout: true
+    tile:
+      layout: grid
+      rows:
+      - height: 0.6756761
+        columns:
+        - width: null
+          tile:
+            layout: pane
+            id: 75a10ded-3df5-4363-b21a-668eb6ef6de8
+            title: Script Controls
+            direction: vertical
+            should_fill: true
+            elements:
+            - controls: script_table
+              scripts:
+              - id: hello-world
+                label: null
+                path: /Users/aarondiamond-reivich/Nominal/projects/hello-world/hello-world.py
+                args: []
+                max_log_lines: 10000
+              - id: arduino-plant
+                label: Project 2 — Arduino plant
+                path: /Users/aarondiamond-reivich/Nominal/projects/project2/arduino-plant.py
+                args: []
+                max_log_lines: 10000
+              - id: null
+                label: null
+                path: /Users/aarondiamond-reivich/Nominal/projects/hello-world/debug.py
+                args: []
+                max_log_lines: 10000
+              show_output_column: true
+      - height: 1.3243252
+        columns:
+        - width: null
+          tile:
+            layout: grid
+            rows:
+            - height: null
+              columns:
+              - width: null
+                tile:
+                  layout: pane
+                  id: 06046c87-5cff-4a62-b231-f8821eac9e86
+                  title: Form
+                  direction: vertical
+                  should_fill: true
+                  elements:
+                  - id: null
+                    spacing: normal
+                    inputs:
+                    - input: checkbox
+                      id: system_on
+                      label: System on
+                      on_toggle_action:
+                      - _kind: message
+                        topic: script/project2/system_on
+                        contents:
+                          enabled: $system_on
+            - height: null
+              columns:
+              - width: null
+                tile:
+                  layout: pane
+                  id: 3728535c-cd3b-4d2c-b39f-c0e75f9f0a5d
+                  title: Table
+                  direction: vertical
+                  should_fill: true
+                  elements:
+                  - display: table
+                    script_id: arduino-plant
+        - width: null
+          tile:
+            layout: pane
+            id: 98db6b85-1425-4d68-a9fb-6f9a1073f383
+            title: Joystick voltage (V)
+            direction: vertical
+            should_fill: true
+            elements:
+            - plot: line
+              stream_id: joystick_voltage
+              channels:
+              - value
+              colors: []
+              legend_placement: bottom_left
+              x_format: timestamp
+              x_time_display: Local
+              x_scale: linear
+              y_scale: linear
+      - height: 1.0
+        columns:
+        - width: null
+          tile:
+            layout: pane
+            id: a1b2c3d4-e5f6-4789-a012-3456789abcde
+            title: System on / enable
+            direction: vertical
+            should_fill: true
+            elements:
+            - plot: line
+              stream_id: system_on
+              channels:
+              - value
+              colors: []
+              legend_placement: bottom_left
+              x_format: timestamp
+              x_time_display: Local
+              x_scale: linear
+              y_scale: linear
+left_panel: null
+right_panel: null
+bottom_panel: null
+scene: {}
+poster: null
+prompt_windows: []
+mcap_path: null
+conditionals: []
