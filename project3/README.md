@@ -301,14 +301,6 @@ Only **one** wire goes to **FIO6**, and it comes from the **FIO tap** row (betwe
 
 **Breadboard tip:** On a typical mini breadboard, holes **a–e** in one row are connected, and **f–j** in that row are connected; the **center trench** separates left and right. Put the **echo bus** on one side (e.g. row 20, column **e**) and the **FIO tap** on another hole in a different row (e.g. row 22, column **e**), with resistors spanning between rows as needed.
 
-**If you only have other kit values**
-
-| You have | Build | Tap voltage (Echo = 5 V) |
-|----------|--------|---------------------------|
-| **1 kΩ + 2 kΩ** | Recommended above | ~3.3 V |
-| **1 kΩ + two 1 kΩ in series** (2 kΩ to GND) | Top 1 kΩ, bottom = 2×1 kΩ | ~3.3 V |
-| **10 kΩ + 20 kΩ** (or 10 kΩ + two 10 kΩ to GND) | Same topology, larger values | ~3.3 V |
-
 **Phase order (safest)**
 
 | Phase | Echo wiring |
