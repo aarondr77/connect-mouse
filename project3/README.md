@@ -2,7 +2,9 @@
 
 **Prerequisites:** Complete [Project 2](../project2/README.md) (joystick on **VRx**, shared ground, LabJack **FIO4 → D2**, Connect streaming). Read [LEARNINGS.md](../project2/LEARNINGS.md) for why tests and wiring contracts matter.
 
-This README is the **build plan** for the next bench: use the joystick to **move the Mac cursor**, use an **HC-SR04 ultrasonic** for **proximity click** (hand closer = click), and stream **everything through Nominal Connect** with **dual sensing** on both **LabJack** and **Arduino**.
+This README is the **build plan** for the next bench: use the joystick to **move the Mac cursor**, use an **HC-SR04 ultrasonic** for **proximity click** (hand closer = click), and stream **everything through Nominal Connect**.
+
+**Implemented software (streaming v1):** All sensor plots come from the **LabJack** only (`joystick_x`, `joystick_y`, `distance`). The Arduino runs [`sensor_node.ino`](sensor_node/sensor_node.ino) for **FIO4 → D2** enable and the pin-13 LED only — no USB serial telemetry. Wiring can still include **A0/A1** and **D7/D8** for future use, but Connect does not read them.
 
 ---
 
@@ -331,72 +333,58 @@ Only **one** wire goes to **FIO6**, and it comes from the **FIO tap** row (betwe
 
 ## 7. Data streams in Connect
 
-Planned stream IDs for `mouse-control.py` (names can match `app.connect` plots):
+Stream IDs from `mouse-control.py` (match `app.connect` plots):
 
 | Stream | Unit | Source | Purpose |
 |--------|------|--------|---------|
-| `joystick_x` | V | LabJack **AIN0** | Primary X for plots / mouse |
-| `joystick_y` | V | LabJack **AIN1** | Primary Y for plots / mouse |
-| `joystick_x_arduino` | V | Serial (`a0`) | Cross-check |
-| `joystick_y_arduino` | V | Serial (`a1`) | Cross-check |
-| `distance_lj` | cm | LabJack **FIO5/6** | Primary distance (LabJack path) |
-| `distance_arduino` | cm | Serial | Cross-check / backup |
-| `distance_delta` | cm | Script | `abs(distance_lj - distance_arduino)` |
-| `click` | 0/1 | Script | Proximity click event |
+| `joystick_x` | V | LabJack **AIN0** | X for plots / future mouse |
+| `joystick_y` | V | LabJack **AIN1** | Y for plots / future mouse |
+| `distance` | cm | LabJack **FIO5/6** | Ultrasonic distance |
 | `system_on` | 0/1 | UI / FIO4 | Optional arm switch |
 | `enable_out` | 0/1 | LabJack **FIO4** | Echo of enable line |
 
+**Later:** `click` (proximity), optional dual-path streams if you add Arduino serial cross-check again.
+
 ---
 
-## 8. Software components (to implement)
+## 8. Software components
 
 ### 8.1 `project3/sensor_node/sensor_node.ino` (Arduino)
 
-**Responsibilities:**
+**Responsibilities (implemented):**
 
-- Read **A0**, **A1** → report `a0=…` `a1=…` (0–1023 or volts)  
-- Read **HC-SR04** on **D7/D8** → report `distance_cm=…`  
-- Optional: read **D2** enable, blink LED (carry over from `plant.ino`)  
-- Print **one line per loop** at ~10–20 Hz, e.g.  
-  `a0=512 a1=498 distance_cm=24.3`
-
-**Does not** move the mouse (Mac Python does that).
+- Read **D2** enable from LabJack **FIO4**  
+- Pin **13** LED: solid when enabled, slow blink when idle  
+- **Does not** read joystick or ultrasonic (LabJack does that)  
+- **Does not** use USB serial for Connect
 
 ### 8.2 `project3/mouse-control.py` (Nominal Connect script)
 
-**Responsibilities:**
+**Responsibilities (implemented, streaming only):**
 
-1. Open LabJack; configure **AIN0**, **AIN1**, **FIO4**, **FIO5**, **FIO6**  
-2. Open serial to Arduino (port from env or Connect arg)  
-3. Each loop (~20–50 Hz):  
-   - `read_analog()` → stream `joystick_x`, `joystick_y`  
-   - Run HC-SR04 sequence on **FIO5/FIO6** → stream `distance_lj`  
-   - Parse serial → stream `joystick_*_arduino`, `distance_arduino`, `distance_delta`  
-   - Proximity click state machine → stream `click`, optional `pynput` click  
-   - Optional: message bus `system_on` → **FIO4**  
-4. On exit: **FIO4** low, close devices  
+1. Open LabJack via **labjack-ljm** (single handle)  
+2. Each loop (~20 Hz): read **AIN0/AIN1**, **FIO5/FIO6** ultrasonic, stream `joystick_x`, `joystick_y`, `distance`  
+3. Message bus `system_on` → drive **FIO4** (Arduino enable + LED)  
+4. On exit: **FIO4** low, close LabJack  
 
-**HC-SR04 on LabJack (implementation note):** use LJM calls for digital write + pulse-width read, or `daq.query_arbitrary_command` if exposed. If v1 is blocked, stream `distance_lj` as NaN until implemented — **still stream `distance_arduino`** so click + plots work.
+**Deferred:** serial cross-check, proximity `click`, `pynput` mouse.
 
 ### 8.3 `project3/mouse_tests.py` (TestWorkflow)
 
-See [§12](#12-tests-testworkflow).
+See [§12](#12-tests-testworkflow). Uses NominalDAQ for joystick tests; LJM for ultrasonic (releases DAQ handle briefly).
 
-### 8.4 `app.connect` updates
+### 8.4 `app.connect`
 
-- Add script **mouse-control**  
-- Plots: `joystick_x`, `joystick_y`, `distance_lj`, `distance_arduino`, `click`  
-- Test Workflow → `mouse_tests.py`  
-- Optional: reuse **System on** checkbox from Project 2  
+Script **mouse-control**, Test Workflow **mouse_tests**, plots for `joystick_x`, `joystick_y`, `distance`, **System on** checkbox (`script/project3/system_on`).
 
-### 8.5 Python dependencies (add when implementing mouse phase)
+### 8.5 Python dependencies
 
 ```text
-pyserial          # Arduino serial
-pynput            # mouse move + click (macOS Accessibility)
+nominal-instro[daq]
+labjack-ljm
 ```
 
-Add to `requirements.txt` and `app.connect` `python.packages` when you reach that phase.
+**Later (mouse phase):** `pynput` for cursor move + click.
 
 ---
 
@@ -493,11 +481,8 @@ Planned tests in `mouse_tests.py`:
 | `test_labjack_joystick_y_not_on_rail` | **AIN1** same |
 | `test_joystick_x_motion` | Sweep X span &gt; threshold |
 | `test_joystick_y_motion` | Sweep Y span &gt; threshold |
-| `test_arduino_joystick_tracks_labjack` | \|V_LJ − V_arduino\| &lt; tolerance on both axes |
-| `test_ultrasonic_arduino_in_range` | `distance_arduino` in 2–400 cm |
-| `test_ultrasonic_labjack_in_range` | `distance_lj` in range (skip if not implemented) |
-| `test_ultrasonic_paths_agree` | \|distance_lj − distance_arduino\| &lt; 10 cm typical |
-| `test_proximity_click_on_approach` | Scripted near object → `click` fired (manual step) |
+| `test_ultrasonic_in_range` | `distance` via **FIO5/FIO6** in 2–400 cm |
+| `test_enable_off_after_tests` | **FIO4** left low |
 
 Reuse patterns from [plant_tests.py](../project2/plant_tests.py) (`RAIL_HIGH_V`, `addComment`, rail hints).
 
@@ -507,8 +492,7 @@ Reuse patterns from [plant_tests.py](../project2/plant_tests.py) (`RAIL_HIGH_V`,
 
 | Feature | Permission |
 |---------|------------|
-| Mouse move / click via **pynput** | **Accessibility** |
-| USB serial (Arduino) | Usually automatic |
+| Mouse move / click via **pynput** (later) | **Accessibility** |
 | LabJack | Driver / Kipling not running during script |
 
 ---
@@ -519,10 +503,8 @@ Reuse patterns from [plant_tests.py](../project2/plant_tests.py) (`RAIL_HIGH_V`,
 |---------|----------------|
 | **AIN0 or AIN1 stuck at ~5 V** | Missing joystick **GND** or signal on **+5V** row |
 | **Y flat, X works** | **VRy** not on **AIN1** row |
-| **distance_arduino** always 0 or huge | HC-SR04 power/GND; wrong **D7/D8** |
-| **distance_lj** wrong, Arduino OK | **FIO6** on divider **tap** (not echo bus); **2 kΩ** to GND; FIO timing |
-| **distance_lj** flat / nonsense, Arduino OK | Echo wired **direct** to **FIO6** (5 V — fix per §6.3.1) or missing **2 kΩ** to **− rail** |
-| **distance_lj** and **distance_arduino** differ by &gt;15 cm | Bad divider; loose tap row; aim sensor; both hosts pulsing **Trig** at once (uncommon) |
+| **`distance` flat / NaN** | **FIO6** on divider **tap** (not echo bus); **2 kΩ** to GND; stop other LabJack scripts |
+| **`distance` wrong** | Echo wired **direct** to **FIO6** (5 V — fix per §6.3.1); bad divider; aim sensor |
 | **No click** | Threshold; use **FAR/NEAR** hysteresis; hand too far |
 | **Too many clicks** | Lower sensitivity; edge-only; aim away from desk clutter |
 | **LabJack busy** | Stop other scripts using T4 |
@@ -534,12 +516,12 @@ Reuse patterns from [plant_tests.py](../project2/plant_tests.py) (`RAIL_HIGH_V`,
 | File | Status | Purpose |
 |------|--------|---------|
 | `project3/README.md` | **This file** | Implementation plan |
-| `project3/sensor_node/sensor_node.ino` | To build | Arduino: A0, A1, HC-SR04, serial |
-| `project3/mouse-control.py` | To build | Connect: LabJack + serial + streams + click |
-| `project3/mouse_tests.py` | To build | TestWorkflow |
-| `project3/TESTING.md` | Optional | Connect UI steps for Project 3 |
-| `app.connect` | To update | Scripts, plots, test workflow |
-| `requirements.txt` | To update | `pyserial`, `pynput` when needed |
+| `project3/sensor_node/sensor_node.ino` | **Built** | Arduino enable + LED only |
+| `project3/mouse-control.py` | **Built** | Connect: LabJack streams |
+| `project3/mouse_tests.py` | **Built** | TestWorkflow |
+| `project3/TESTING.md` | **Built** | Connect UI steps |
+| `project3/app.connect` | **Built** | Scripts, plots, tests |
+| `requirements.txt` | **Built** | `nominal-instro`, `labjack-ljm` |
 
 **Project 2 files stay as-is** — they remain your reference bench for enable + single-axis bring-up.
 
@@ -551,7 +533,7 @@ Reuse patterns from [plant_tests.py](../project2/plant_tests.py) (`RAIL_HIGH_V`,
 |-----------|-------------------------|
 | One analog axis (**VRx**) | Two axes (**VRx**, **VRy**) |
 | `joystick_voltage` | `joystick_x`, `joystick_y` |
-| No ultrasonic | **distance_lj** + **distance_arduino** |
+| No ultrasonic | **`distance`** on LabJack **FIO5/FIO6** |
 | Plant LED behavior | Optional; focus on mouse + click |
 | `plant_tests.py` | `mouse_tests.py` + cross-check tests |
 
@@ -559,4 +541,4 @@ You already proved Connect + LabJack + Arduino + tests work. This project **exte
 
 ---
 
-*When you start Phase A, implement `sensor_node.ino` and `mouse-control.py` streaming only — no mouse movement until plots look right.*
+*Streaming v1 is implemented. Run `mouse-control.py` in Connect and confirm **joystick_x**, **joystick_y**, and **distance** before adding mouse/click.*

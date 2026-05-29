@@ -1,0 +1,185 @@
+title: Project 3 — Joystick + Ultrasonic
+window_title: Project 3
+logo_path: null
+timeline:
+  show: false
+  display: relative
+  pixels_per_tick: 0.0
+  milestones: []
+streaming:
+  buffer_size: 5000
+  timeline: null
+  playback_speed: null
+  window: null
+  persistence:
+  - enabled: 'true'
+    data_source_rid: null
+    file_path: null
+    streams: []
+  channels:
+  - channel: joystick_x.value
+    unit: V
+  - channel: joystick_y.value
+    unit: V
+  - channel: distance.value
+    unit: cm
+  - channel: system_on.value
+  - channel: enable_out.value
+python:
+  packages:
+  - nominal-instro[daq]
+  - nominal
+  - labjack-ljm
+  wheelhouse: null
+on_load: null
+on_unload: null
+tiles:
+- layout: tabs
+  tabs:
+  - title: Sensors
+    allow_popout: true
+    tile:
+      layout: grid
+      rows:
+      - height: 0.35
+        columns:
+        - width: null
+          tile:
+            layout: pane
+            id: f1a2b3c4-d5e6-4789-a012-300000000001
+            title: Script Controls
+            direction: vertical
+            should_fill: true
+            elements:
+            - controls: script_table
+              scripts:
+              - id: mouse-control
+                label: Project 3 — Stream sensors
+                path: /Users/aarondiamond-reivich/Nominal/projects/project3/mouse-control.py
+                args: []
+                max_log_lines: 10000
+              show_output_column: true
+      - height: 0.25
+        columns:
+        - width: 1.0
+          tile:
+            layout: pane
+            id: f1a2b3c4-d5e6-4789-a012-300000000002
+            title: Controls
+            direction: vertical
+            should_fill: true
+            elements:
+            - id: null
+              spacing: normal
+              inputs:
+              - input: checkbox
+                id: system_on
+                label: System on
+                on_toggle_action:
+                - _kind: message
+                  topic: script/project3/system_on
+                  contents:
+                    enabled: $system_on
+        - width: 1.0
+          tile:
+            layout: pane
+            id: f1a2b3c4-d5e6-4789-a012-300000000003
+            title: Test Workflow
+            direction: vertical
+            should_fill: true
+            elements:
+            - controls: test_workflow
+              label: null
+              script:
+                id: mouse-tests
+                label: Mouse Tests
+                path: /Users/aarondiamond-reivich/Nominal/projects/project3/mouse_tests.py
+                args: []
+                max_log_lines: 10000
+              output_table:
+                location: bottom
+                columns: []
+      - height: 0.45
+        columns:
+        - width: 1.0
+          tile:
+            layout: pane
+            id: f1a2b3c4-d5e6-4789-a012-300000000004
+            title: Joystick X (V)
+            direction: vertical
+            should_fill: true
+            elements:
+            - plot: line
+              stream_id: joystick_x
+              channels:
+              - value
+              colors: []
+              legend_placement: bottom_left
+              x_format: timestamp
+              x_time_display: Local
+              x_scale: linear
+              y_scale: linear
+        - width: 1.0
+          tile:
+            layout: pane
+            id: f1a2b3c4-d5e6-4789-a012-300000000005
+            title: Joystick Y (V)
+            direction: vertical
+            should_fill: true
+            elements:
+            - plot: line
+              stream_id: joystick_y
+              channels:
+              - value
+              colors: []
+              legend_placement: bottom_left
+              x_format: timestamp
+              x_time_display: Local
+              x_scale: linear
+              y_scale: linear
+      - height: 0.45
+        columns:
+        - width: 1.0
+          tile:
+            layout: pane
+            id: f1a2b3c4-d5e6-4789-a012-300000000006
+            title: Distance (cm)
+            direction: vertical
+            should_fill: true
+            elements:
+            - plot: line
+              stream_id: distance
+              channels:
+              - value
+              colors: []
+              legend_placement: bottom_left
+              x_format: timestamp
+              x_time_display: Local
+              x_scale: linear
+              y_scale: linear
+        - width: 1.0
+          tile:
+            layout: pane
+            id: f1a2b3c4-d5e6-4789-a012-300000000007
+            title: System on / enable
+            direction: vertical
+            should_fill: true
+            elements:
+            - plot: line
+              stream_id: system_on
+              channels:
+              - value
+              colors: []
+              legend_placement: bottom_left
+              x_format: timestamp
+              x_time_display: Local
+              x_scale: linear
+              y_scale: linear
+left_panel: null
+right_panel: null
+bottom_panel: null
+scene: {}
+poster: null
+prompt_windows: []
+mcap_path: null
+conditionals: []
