@@ -1,4 +1,4 @@
-title: Project 3 — Joystick + Ultrasonic
+title: PROJECT 3 — JOYSTICK + ULTRASONIC
 window_title: Project 3
 logo_path: null
 timeline:
@@ -41,27 +41,9 @@ tiles:
     tile:
       layout: grid
       rows:
-      - height: 0.35
+      - height: 0.4719693
         columns:
-        - width: null
-          tile:
-            layout: pane
-            id: f1a2b3c4-d5e6-4789-a012-300000000001
-            title: Script Controls
-            direction: vertical
-            should_fill: true
-            elements:
-            - controls: script_table
-              scripts:
-              - id: mouse-control
-                label: Project 3 — Stream sensors
-                path: /Users/aarondiamond-reivich/Nominal/projects/project3/mouse-control.py
-                args: []
-                max_log_lines: 10000
-              show_output_column: true
-      - height: 0.25
-        columns:
-        - width: 1.0
+        - width: 0.33416766
           tile:
             layout: pane
             id: f1a2b3c4-d5e6-4789-a012-300000000002
@@ -80,7 +62,23 @@ tiles:
                   topic: script/project3/system_on
                   contents:
                     enabled: $system_on
-        - width: 1.0
+        - width: 0.6694406
+          tile:
+            layout: pane
+            id: f1a2b3c4-d5e6-4789-a012-300000000001
+            title: Script Controls
+            direction: vertical
+            should_fill: true
+            elements:
+            - controls: script_table
+              scripts:
+              - id: mouse-control
+                label: Project 3 — Stream sensors
+                path: /Users/aarondiamond-reivich/Nominal/projects/project3/mouse-control.py
+                args: []
+                max_log_lines: 10000
+              show_output_column: true
+        - width: 1.996392
           tile:
             layout: pane
             id: f1a2b3c4-d5e6-4789-a012-300000000003
@@ -99,7 +97,7 @@ tiles:
               output_table:
                 location: bottom
                 columns: []
-      - height: 0.45
+      - height: 0.37169078
         columns:
         - width: 1.0
           tile:

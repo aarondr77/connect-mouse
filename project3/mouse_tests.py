@@ -87,14 +87,21 @@ class MouseTests(connect_python.TestWorkflow):
         self.daq.write_digital_line("enable_out", 0)
         self.daq.close()
 
+    def _analog_latest(self, measurement, alias: str) -> float:
+        """Latest sample for an analog alias (NominalDAQ keys are ``{name}.{alias}``)."""
+        data = measurement.channel_data
+        for key in (f"{self.daq.name}.{alias}", alias):
+            samples = data.get(key)
+            if samples:
+                return float(samples[-1])
+        return math.nan
+
     def _read_voltages(self) -> tuple[float, float]:
         measurement = self.daq.read_analog()
-        values = list(measurement.values)
-        if len(values) >= 2:
-            return float(values[0]), float(values[1])
-        if len(values) == 1:
-            return float(values[0]), math.nan
-        return math.nan, math.nan
+        return (
+            self._analog_latest(measurement, "joystick_x"),
+            self._analog_latest(measurement, "joystick_y"),
+        )
 
     def _set_enable(self, on: bool) -> None:
         self.daq.write_digital_line("enable_out", 1 if on else 0)
