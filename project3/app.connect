@@ -25,11 +25,18 @@ streaming:
     unit: cm
   - channel: system_on.value
   - channel: enable_out.value
+  - channel: mouse_dx.value
+    unit: px
+  - channel: mouse_dy.value
+    unit: px
+  - channel: click.value
+  - channel: near_state.value
 python:
   packages:
   - nominal-instro[daq]
   - nominal
   - labjack-ljm
+  - pynput
   wheelhouse: null
 on_load: null
 on_unload: null
@@ -62,6 +69,40 @@ tiles:
                   topic: script/project3/system_on
                   contents:
                     enabled: $system_on
+              - input: slider
+                id: mouse_speed
+                label: Mouse speed (px/V)
+                value: 80
+                min: 10
+                max: 300
+              - input: slider
+                id: dead_zone_v
+                label: Dead zone (V)
+                value: 0.25
+                min: 0.05
+                max: 0.8
+              - input: checkbox
+                id: invert_y
+                label: Invert Y
+                value: true
+              - input: slider
+                id: near_cm
+                label: Near threshold (cm)
+                value: 15
+                min: 5
+                max: 40
+              - input: slider
+                id: far_cm
+                label: Far threshold (cm)
+                value: 22
+                min: 10
+                max: 60
+              - input: slider
+                id: stable_ms
+                label: Click stable (ms)
+                value: 100
+                min: 0
+                max: 500
         - width: 0.6694406
           tile:
             layout: pane
@@ -73,7 +114,7 @@ tiles:
             - controls: script_table
               scripts:
               - id: mouse-control
-                label: Project 3 — Stream sensors
+                label: Project 3 — Mouse control
                 path: /Users/aarondiamond-reivich/Nominal/projects/project3/mouse-control.py
                 args: []
                 max_log_lines: 10000
@@ -165,6 +206,44 @@ tiles:
             elements:
             - plot: line
               stream_id: system_on
+              channels:
+              - value
+              colors: []
+              legend_placement: bottom_left
+              x_format: timestamp
+              x_time_display: Local
+              x_scale: linear
+              y_scale: linear
+      - height: 0.35
+        columns:
+        - width: 1.0
+          tile:
+            layout: pane
+            id: f1a2b3c4-d5e6-4789-a012-300000000008
+            title: Click
+            direction: vertical
+            should_fill: true
+            elements:
+            - plot: line
+              stream_id: click
+              channels:
+              - value
+              colors: []
+              legend_placement: bottom_left
+              x_format: timestamp
+              x_time_display: Local
+              x_scale: linear
+              y_scale: linear
+        - width: 1.0
+          tile:
+            layout: pane
+            id: f1a2b3c4-d5e6-4789-a012-300000000009
+            title: Near state
+            direction: vertical
+            should_fill: true
+            elements:
+            - plot: line
+              stream_id: near_state
               channels:
               - value
               colors: []

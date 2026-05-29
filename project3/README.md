@@ -4,7 +4,7 @@
 
 This README is the **build plan** for the next bench: use the joystick to **move the Mac cursor**, use an **HC-SR04 ultrasonic** for **proximity click** (hand closer = click), and stream **everything through Nominal Connect**.
 
-**Implemented software (streaming v1):** All sensor plots come from the **LabJack** only (`joystick_x`, `joystick_y`, `distance`). The Arduino runs [`sensor_node.ino`](sensor_node/sensor_node.ino) for **FIO4 → D2** enable and the pin-13 LED only — no USB serial telemetry. Wiring can still include **A0/A1** and **D7/D8** for future use, but Connect does not read them.
+**Implemented software (streaming + mouse v2):** All sensor plots come from the **LabJack** only (`joystick_x`, `joystick_y`, `distance`). When **System on** is armed, the script moves the Mac cursor from the joystick and fires proximity left-clicks from ultrasonic distance. Live tuning via Connect sliders (`mouse_speed`, dead zone, near/far thresholds).
 
 ---
 
@@ -337,13 +337,15 @@ Stream IDs from `mouse-control.py` (match `app.connect` plots):
 
 | Stream | Unit | Source | Purpose |
 |--------|------|--------|---------|
-| `joystick_x` | V | LabJack **AIN0** | X for plots / future mouse |
-| `joystick_y` | V | LabJack **AIN1** | Y for plots / future mouse |
-| `distance` | cm | LabJack **FIO5/6** | Ultrasonic distance |
-| `system_on` | 0/1 | UI / FIO4 | Optional arm switch |
+| `joystick_x` | V | LabJack **AIN0** | X axis + mouse mapping |
+| `joystick_y` | V | LabJack **AIN1** | Y axis + mouse mapping |
+| `distance` | cm | LabJack **FIO5/6** | Ultrasonic distance + proximity click |
+| `system_on` | 0/1 | UI / FIO4 | Arm switch for enable + mouse/click |
 | `enable_out` | 0/1 | LabJack **FIO4** | Echo of enable line |
-
-**Later:** `click` (proximity), optional dual-path streams if you add Arduino serial cross-check again.
+| `mouse_dx` | px | Script | Cursor delta X (debug) |
+| `mouse_dy` | px | Script | Cursor delta Y (debug) |
+| `click` | 0/1 | Script | Spike on each proximity left-click |
+| `near_state` | 0/1 | Script | Hand in near zone (tuning aid) |
 
 ---
 
@@ -360,14 +362,14 @@ Stream IDs from `mouse-control.py` (match `app.connect` plots):
 
 ### 8.2 `project3/mouse-control.py` (Nominal Connect script)
 
-**Responsibilities (implemented, streaming only):**
+**Responsibilities (implemented):**
 
-1. Open LabJack via **labjack-ljm** (single handle)  
-2. Each loop (~20 Hz): read **AIN0/AIN1**, **FIO5/FIO6** ultrasonic, stream `joystick_x`, `joystick_y`, `distance`  
-3. Message bus `system_on` → drive **FIO4** (Arduino enable + LED)  
-4. On exit: **FIO4** low, close LabJack  
-
-**Deferred:** serial cross-check, proximity `click`, `pynput` mouse.
+1. Open LabJack via **labjack-ljm** (single handle)
+2. Each loop (~20 Hz): read **AIN0/AIN1**, **FIO5/FIO6** ultrasonic, stream all channels
+3. Message bus `system_on` → drive **FIO4** (Arduino enable + LED)
+4. When **System on**: map joystick volts → **pynput** relative cursor move; proximity edge → left-click
+5. Read Connect UI sliders live (`mouse_speed`, `dead_zone_v`, `near_cm`, `far_cm`, `stable_ms`, `invert_y`)
+6. On exit: **FIO4** low, close LabJack
 
 ### 8.3 `project3/mouse_tests.py` (TestWorkflow)
 
@@ -375,16 +377,15 @@ See [§12](#12-tests-testworkflow). Uses NominalDAQ for joystick tests; LJM for 
 
 ### 8.4 `app.connect`
 
-Script **mouse-control**, Test Workflow **mouse_tests**, plots for `joystick_x`, `joystick_y`, `distance`, **System on** checkbox (`script/project3/system_on`).
+Script **Project 3 — Mouse control**, Test Workflow **mouse_tests**, sensor plots, **click** / **near_state** plots, **System on** checkbox, and tuning sliders (`mouse_speed` default 80 px/V, dead zone, invert Y, near/far cm, stable ms).
 
 ### 8.5 Python dependencies
 
 ```text
 nominal-instro[daq]
 labjack-ljm
+pynput
 ```
-
-**Later (mouse phase):** `pynput` for cursor move + click.
 
 ---
 
@@ -417,14 +418,14 @@ Stream `click=1` for one sample on each click for the plot spike.
 
 ---
 
-## 10. Mouse movement (later phase)
+## 10. Mouse movement (implemented)
 
-After streams and tests are solid:
+When **System on** is armed:
 
-1. Map voltage → cursor delta with **dead zone** (center ≈ 2.5 V)  
-2. Scale **VRx** → ΔX, **VRy** → ΔY (invert Y if needed)  
-3. `pynput` relative move each loop  
-4. Only when `system_on` or always-on toggle  
+1. Map voltage → cursor delta with **dead zone** (center ≈ 2.5 V)
+2. Scale **VRx** → ΔX, **VRy** → ΔY (`invert_y` checkbox in Connect)
+3. **pynput** relative move each loop (~20 Hz)
+4. **`mouse_speed`** slider (default **80 px/V**) tunes feel live in Connect
 
 **macOS:** System Settings → Privacy & Security → **Accessibility** → allow your Connect / Python host.
 
@@ -492,7 +493,7 @@ Reuse patterns from [plant_tests.py](../project2/plant_tests.py) (`RAIL_HIGH_V`,
 
 | Feature | Permission |
 |---------|------------|
-| Mouse move / click via **pynput** (later) | **Accessibility** |
+| Mouse move / click via **pynput** | **Accessibility** |
 | LabJack | Driver / Kipling not running during script |
 
 ---
@@ -517,11 +518,11 @@ Reuse patterns from [plant_tests.py](../project2/plant_tests.py) (`RAIL_HIGH_V`,
 |------|--------|---------|
 | `project3/README.md` | **This file** | Implementation plan |
 | `project3/sensor_node/sensor_node.ino` | **Built** | Arduino enable + LED only |
-| `project3/mouse-control.py` | **Built** | Connect: LabJack streams |
+| `project3/mouse-control.py` | **Built** | Connect: LabJack streams + mouse/click |
 | `project3/mouse_tests.py` | **Built** | TestWorkflow |
-| `project3/TESTING.md` | **Built** | Connect UI steps |
-| `project3/app.connect` | **Built** | Scripts, plots, tests |
-| `requirements.txt` | **Built** | `nominal-instro`, `labjack-ljm` |
+| `project3/TESTING.md` | **Built** | Connect UI + mouse bench steps |
+| `project3/app.connect` | **Built** | Scripts, plots, tuning sliders, tests |
+| `requirements.txt` | **Built** | `nominal-instro`, `labjack-ljm`, `pynput` |
 
 **Project 2 files stay as-is** — they remain your reference bench for enable + single-axis bring-up.
 
@@ -541,4 +542,4 @@ You already proved Connect + LabJack + Arduino + tests work. This project **exte
 
 ---
 
-*Streaming v1 is implemented. Run `mouse-control.py` in Connect and confirm **joystick_x**, **joystick_y**, and **distance** before adding mouse/click.*
+*Run **Project 3 — Mouse control** in Connect. Confirm sensor plots, then arm **System on** to move the cursor and trigger proximity clicks. See [TESTING.md](TESTING.md) for the bench checklist.*

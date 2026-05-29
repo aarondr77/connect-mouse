@@ -12,9 +12,9 @@ Bench acceptance tests for LabJack joystick + ultrasonic sensing. Connect runs e
 
 | | `mouse-control.py` | `mouse_tests.py` |
 |---|-------------------|------------------|
-| **Purpose** | Live streaming plots | One-shot wiring/sensor checklist |
+| **Purpose** | Live streaming + mouse/click when armed | One-shot wiring/sensor checklist |
 | **Runs** | Loop until you stop | Fixed tests, then done |
-| **Verdict** | You eyeball plots | `assert` → pass or fail |
+| **Verdict** | You eyeball plots + cursor behavior | `assert` → pass or fail |
 
 ## Tests included
 
@@ -37,18 +37,37 @@ The Test Workflow path must be:
 
 If the run finishes instantly with only `Starting script`, Connect is pointing at a stub file.
 
-## Streaming script
+## Mouse control script
 
 1. Open [`app.connect`](app.connect) in Nominal Connect.
-2. Run **Project 3 — Stream sensors**.
+2. Run **Project 3 — Mouse control**.
 3. Move the joystick and wave a hand in front of the HC-SR04 — **joystick_x**, **joystick_y**, and **distance** plots should update.
 
 All sensor data comes from the **LabJack** (not USB serial). The Arduino only mirrors **FIO4 → D2** for the pin-13 LED.
 
-## Deferred (not in this build)
+### macOS Accessibility (one-time)
 
-- Mouse cursor movement (`pynput`)
-- Proximity click on the Mac
-- `click` stream
+Before cursor/click work, grant **Accessibility** permission:
 
-See [`README.md`](README.md) Phase D for when you add those.
+**System Settings → Privacy & Security → Accessibility** → enable Nominal Connect (or the Python binary shown in the script log).
+
+### Manual mouse + click checklist
+
+1. Run the script; confirm sensor plots live.
+2. Leave **System on** unchecked — move stick and wave hand → **no** cursor move or Mac click; plots still update.
+3. Check **System on** — move stick → cursor moves; centered stick stops movement.
+4. Adjust **Mouse speed (px/V)** (default 80) and **Dead zone (V)** sliders live — feel changes without restart.
+5. Wave hand into ultrasonic range → one left-click per approach; **click** plot spikes to 1.
+6. Tune **Near/Far threshold** and **Click stable (ms)** if you get double-clicks or misses.
+7. Uncheck **System on** → cursor and clicks stop; Arduino LED blinks again.
+
+Connect UI tuning widgets (read live by the script):
+
+| Widget id | Default | Purpose |
+|-----------|---------|---------|
+| `mouse_speed` | 80 px/V | Cursor speed |
+| `dead_zone_v` | 0.25 V | Ignore stick noise near center |
+| `invert_y` | on | Stick up → cursor up |
+| `near_cm` | 15 cm | Enter proximity zone |
+| `far_cm` | 22 cm | Leave proximity zone (hysteresis) |
+| `stable_ms` | 100 ms | Hold near before click fires |
