@@ -45,7 +45,7 @@ You have three pieces working together:
 
 **When “System on” is OFF:** Arduino built-in LED (pin 13) blinks slowly (~once per second).
 
-**When “System on” is ON:** LED stays solid; moving the joystick **left/right** changes voltage on the plot (and optional LED on pin D9).
+**When “System on” is ON:** LED stays solid; moving the joystick **left/right** changes voltage on the plot.
 
 ---
 
@@ -79,8 +79,6 @@ Gather these before Step 2:
 | 4 | Breadboard | White board with holes (mini size is fine) |
 | 5 | Jumper wires | ~8 male–male wires |
 | 6 | USB cables | One for UNO, one for LabJack |
-
-**Optional:** LED + 220 Ω resistor on Arduino **D9** (extra brightness when running).
 
 **You do NOT need:** a round twist potentiometer. The joystick replaces it.
 
@@ -187,7 +185,6 @@ Hold the board with the **USB connector at the bottom** (typical orientation).
 | Power for joystick | **5V** | |
 | Joystick signal | **A0** | Under “ANALOG IN” |
 | Enable from LabJack | **D2** | On the long **DIGITAL** row (pin 2) |
-| Optional LED | **D9** | |
 
 ---
 
@@ -306,18 +303,7 @@ When the Connect script turns the system on, FIO4 goes high (~3.3 V), which Ardu
 
 ---
 
-### 5.7 Optional — extra LED on pin D9
-
-| From | To |
-|------|-----|
-| Arduino **D9** | 220 Ω resistor → LED **long leg (+)** |
-| LED **short leg (−)** | Breadboard **−** rail (GND) |
-
-When the system is ON, LED brightness follows stick left/right.
-
----
-
-### 5.8 Full wiring diagram
+### 5.7 Full wiring diagram
 
 ```
                          LABJACK T4                          ARDUINO UNO
@@ -326,7 +312,7 @@ When the system is ON, LED brightness follows stick left/right.
                          │         │                         │ 5V      ├── Wire 4 ─┐ │
               Wire 8 ────┤ FIO4    ├─────────────────────────┤ D2      │           │ │
                          │         │                         │ A0      ├───┐       │ │
-              Wire 7 ────┤ AIN0    ├─────┐                   │ (D9)    │   │       │ │
+              Wire 7 ────┤ AIN0    ├─────┐                   │         │   │       │ │
                          └─────────┘     │                   └─────────┘   │       │ │
                                          │                                 │       │ │
      BREADBOARD                          │                                 │       │ │
@@ -350,7 +336,7 @@ When the system is ON, LED brightness follows stick left/right.
 
 ---
 
-### 5.9 Step 2 checklist (check every box)
+### 5.8 Step 2 checklist (check every box)
 
 - [ ] **Wire 1:** LabJack **GND** → breadboard **−** rail  
 - [ ] **Wire 2:** Arduino **GND** → same **−** rail  
@@ -365,7 +351,7 @@ When the system is ON, LED brightness follows stick left/right.
 
 ---
 
-### 5.10 After wiring — what should happen (before Connect)
+### 5.9 After wiring — what should happen (before Connect)
 
 1. Plug in **Arduino** USB → LED on pin 13 should **blink slowly** (system idle).  
 2. Plug in **LabJack** USB.  
@@ -552,7 +538,7 @@ Before Step 4:
 | Check | |
 |-------|---|
 | Step 1 | `plant.ino` uploaded; Step 1 LED test passed |
-| Step 2 | Checklist in §5.9 complete; no 5V→D2 jumper |
+| Step 2 | Checklist in §5.8 complete; no 5V→D2 jumper |
 | Step 3 | Checkbox configured (§6): topic `script/project2/system_on`, id `system_on` |
 | Hardware | Arduino + LabJack USB connected |
 
@@ -599,7 +585,7 @@ When finished, **stop** the script in Connect. The script sets **FIO4 LOW** so t
 | LED always solid | **5V → D2** test jumper still on | Remove jumper; use only **FIO4 → D2** |
 | LED always blinking | Enable never reaches D2 | Check **FIO4 → D2**; turn **System on** ON while script runs |
 | `joystick_voltage` flat | Wrong signal pin | Use **VRx**, not VRy; same row as **A0** and **AIN0** |
-| Plot moves, LED won’t go solid | Ground or D2 | Verify §5.9 ground wires; FIO4 → D2 |
+| Plot moves, LED won’t go solid | Ground or D2 | Verify §5.8 ground wires; FIO4 → D2 |
 | Stick works on Y but not X | Using wrong output | Move stick **left/right**; or wire **VRy** to row 10 instead of VRx |
 | Arduino port missing | Bad USB cable / driver | Try another cable; check **Tools → Port** |
 | Script stops after 5 min | `DURATION_SECONDS = 300` in script | Normal; click Run again or increase timeout in `arduino-plant.py` |
@@ -627,7 +613,7 @@ When finished, **stop** the script in Connect. The script sets **FIO4 LOW** so t
 - Command hardware from Nominal Connect (`system_on` → FIO4)  
 - Stream telemetry (`joystick_voltage`) to verify behavior  
 
-**Next ideas:** run **`plant_tests.py`** as a Test Workflow ([TESTING.md](./TESTING.md)); wire **VRy** to a second analog channel; use joystick **SW** as a digital input.
+**Next ideas:** run **`plant_tests.py`** as a Test Workflow ([TESTING.md](./TESTING.md)); see **[Project 3 plan](../project3/README.md)** for joystick mouse + ultrasonic click.
 
 ---
 
