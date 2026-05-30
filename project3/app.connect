@@ -98,7 +98,7 @@ tiles:
               inputs:
               - input: toggle_switch
                 id: mouse_control_on
-                label: Mouse control on
+                label: Mouse control on (CMD+SHIFT+M)
                 on_toggle_action:
                 - _kind: message
                   topic: script/project3/mouse_control_on
