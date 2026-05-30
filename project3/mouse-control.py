@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import math
 import time
+from collections.abc import Callable
 from datetime import datetime, timezone
 from typing import Any
 
@@ -25,6 +26,8 @@ ENABLE_LABJACK_LINE = "FIO4"
 TRIG_LINE = "FIO5"
 ECHO_LINE = "FIO6"
 MOUSE_CONTROL_TOPIC = "script/project3/mouse_control_on"
+# Global emergency off (macOS). Requires Accessibility for pynput, same as mouse control.
+DISABLE_HOTKEY = "<cmd>+<shift>+m"
 
 # Bench wiring: VRx (stick left/right) → AIN1, VRy (stick up/down) → AIN0.
 JOYSTICK_X_CHANNEL = "AIN1"
@@ -144,6 +147,37 @@ class ProximityClick:
 
         self._was_near = near if near else (self._was_near and not far)
         return should_click
+
+
+class DisableHotkey:
+    """Global hotkey to turn off mouse control without using the cursor."""
+
+    def __init__(self, on_disable: Callable[[], None]) -> None:
+        self._on_disable = on_disable
+        self._hotkeys: Any = None
+
+    def start(self) -> None:
+        try:
+            from pynput import keyboard
+
+            self._hotkeys = keyboard.GlobalHotKeys(
+                {DISABLE_HOTKEY: self._on_disable}
+            )
+            self._hotkeys.start()
+            logger.info(
+                "Emergency disable: press Cmd+Shift+M to turn off mouse control"
+            )
+        except Exception as exc:
+            logger.warning("Disable hotkey unavailable: %s", exc)
+
+    def stop(self) -> None:
+        if self._hotkeys is None:
+            return
+        try:
+            self._hotkeys.stop()
+        except Exception:
+            pass
+        self._hotkeys = None
 
 
 class MacMouse:
@@ -304,6 +338,22 @@ def main(client: connect_python.Client):
     sample_count = 0
     mouse_control_on = False
 
+    def disable_mouse_control() -> None:
+        nonlocal mouse_control_on, last_enable
+        if not mouse_control_on:
+            return
+        mouse_control_on = False
+        labjack.set_enable(False)
+        last_enable = 0
+        try:
+            client.set_value("mouse_control_on", False)
+        except Exception as exc:
+            logger.debug("Could not sync UI toggle: %s", exc)
+        logger.info("Mouse control OFF (keyboard: Cmd+Shift+M)")
+
+    hotkey = DisableHotkey(disable_mouse_control)
+    hotkey.start()
+
     try:
         with connect_python.MessageBus(client) as message_bus:
             message_bus.subscribe_to_topic(MOUSE_CONTROL_TOPIC)
@@ -376,6 +426,7 @@ def main(client: connect_python.Client):
 
             logger.info("Done. Streamed %s samples.", sample_count)
     finally:
+        hotkey.stop()
         labjack.close()
         logger.info("LabJack closed; %s driven LOW.", ENABLE_LABJACK_LINE)
 

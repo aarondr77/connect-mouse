@@ -17,4 +17,6 @@ Control the Mac cursor with a **joystick** and left-click via **ultrasonic proxi
 3. Flip **Mouse control on** when you want cursor movement and proximity clicks.
 4. Tune speed, dead zone, and click thresholds with the sliders (live, no restart).
 
-**macOS:** Grant **Accessibility** to Nominal Connect for mouse control.
+**Emergency off:** While the script is running, press **⌘⇧M** (Cmd+Shift+M) to turn off mouse control immediately — useful if the cursor drifts and you cannot click the toggle.
+
+**macOS:** Grant **Accessibility** to Nominal Connect for mouse control and the disable hotkey.
