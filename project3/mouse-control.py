@@ -25,6 +25,10 @@ TRIG_LINE = "FIO5"
 ECHO_LINE = "FIO6"
 SYSTEM_ON_TOPIC = "script/project3/system_on"
 
+# Bench wiring: VRx (stick left/right) → AIN1, VRy (stick up/down) → AIN0.
+JOYSTICK_X_CHANNEL = "AIN1"
+JOYSTICK_Y_CHANNEL = "AIN0"
+
 SAMPLE_INTERVAL_S = 0.05  # ~20 Hz
 DURATION_SECONDS = 3600.0
 
@@ -219,8 +223,8 @@ class LabJackBench:
     def read_joystick_volts(self) -> tuple[float, float]:
         if self._handle is None:
             return math.nan, math.nan
-        vx = float(self._ljm.eReadName(self._handle, "AIN0"))
-        vy = float(self._ljm.eReadName(self._handle, "AIN1"))
+        vx = float(self._ljm.eReadName(self._handle, JOYSTICK_X_CHANNEL))
+        vy = float(self._ljm.eReadName(self._handle, JOYSTICK_Y_CHANNEL))
         return vx, vy
 
     def read_distance_cm(self) -> float:

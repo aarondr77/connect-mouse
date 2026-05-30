@@ -19,6 +19,10 @@ from nominal_instro.instruments.daq.types import Direction, Logic
 
 ENABLE_LABJACK_LINE = "FIO4"
 
+# Bench wiring: VRx (stick left/right) → AIN1, VRy (stick up/down) → AIN0.
+JOYSTICK_X_CHANNEL = "AIN1"
+JOYSTICK_Y_CHANNEL = "AIN0"
+
 RAIL_HIGH_V = 4.85
 RAIL_LOW_V = 0.15
 CENTERED_TYPICAL_MIN_V = 0.3
@@ -70,14 +74,14 @@ class MouseTests(connect_python.TestWorkflow):
         )
         self.daq.configure_analog_channel(
             direction=Direction.INPUT,
-            physical_channel="AIN0",
+            physical_channel=JOYSTICK_X_CHANNEL,
             alias="joystick_x",
             range_min=-10.0,
             range_max=10.0,
         )
         self.daq.configure_analog_channel(
             direction=Direction.INPUT,
-            physical_channel="AIN1",
+            physical_channel=JOYSTICK_Y_CHANNEL,
             alias="joystick_y",
             range_min=-10.0,
             range_max=10.0,
@@ -148,22 +152,22 @@ class MouseTests(connect_python.TestWorkflow):
         )
 
     def test_labjack_joystick_x_not_on_rail(self) -> None:
-        """AIN0 (X) is not pegged at 0 V or 5 V with stick centered."""
+        """X axis (VRx) is not pegged at 0 V or 5 V with stick centered."""
         self._set_enable(False)
         vx, _ = self._read_voltages()
-        self.addComment(f"AIN0 (X) = {vx:.3f} V (centered)")
-        self._assert_not_on_rail(vx, "AIN0")
+        self.addComment(f"{JOYSTICK_X_CHANNEL} (X) = {vx:.3f} V (centered)")
+        self._assert_not_on_rail(vx, JOYSTICK_X_CHANNEL)
 
     def test_labjack_joystick_y_not_on_rail(self) -> None:
-        """AIN1 (Y) is not pegged at 0 V or 5 V with stick centered."""
+        """Y axis (VRy) is not pegged at 0 V or 5 V with stick centered."""
         self._set_enable(False)
         _, vy = self._read_voltages()
-        self.addComment(f"AIN1 (Y) = {vy:.3f} V (centered)")
-        self._assert_not_on_rail(vy, "AIN1")
+        self.addComment(f"{JOYSTICK_Y_CHANNEL} (Y) = {vy:.3f} V (centered)")
+        self._assert_not_on_rail(vy, JOYSTICK_Y_CHANNEL)
 
     def _sweep_axis(self, axis: str, label: str) -> None:
         self._set_enable(True)
-        channel = "AIN0" if axis == "x" else "AIN1"
+        channel = JOYSTICK_X_CHANNEL if axis == "x" else JOYSTICK_Y_CHANNEL
         stream_id = "joystick_x" if axis == "x" else "joystick_y"
         self.client.clear_stream(stream_id)
 
@@ -192,11 +196,11 @@ class MouseTests(connect_python.TestWorkflow):
         )
 
     def test_joystick_x_motion(self) -> None:
-        """Moving stick X changes AIN0."""
+        """Moving stick left/right changes the X axis channel."""
         self._sweep_axis("x", "left/right (X)")
 
     def test_joystick_y_motion(self) -> None:
-        """Moving stick Y changes AIN1."""
+        """Moving stick up/down changes the Y axis channel."""
         self._sweep_axis("y", "up/down (Y)")
 
     def _read_distance_cm(self) -> float:
