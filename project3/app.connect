@@ -31,6 +31,8 @@ streaming:
     unit: V
   - channel: distance.value
     unit: cm
+  - channel: distance.click_threshold
+    unit: cm
   - channel: mouse_control_on.value
   - channel: enable_out.value
   - channel: mouse_dx.value
@@ -118,16 +120,10 @@ tiles:
                 max: 0.8
               - input: number
                 id: near_cm
-                label: Near threshold (cm)
-                default: 0.0
+                label: Click threshold (cm)
+                default: 10.0
                 min: 5.0
                 max: 40.0
-              - input: number
-                id: far_cm
-                label: Far threshold (cm)
-                default: 0.0
-                min: 10.0
-                max: 60.0
               - input: number
                 id: stable_ms
                 label: Click stable (ms)
@@ -226,7 +222,9 @@ tiles:
               stream_id: distance
               channels:
               - value
+              - click_threshold
               colors:
+              - rgb(0, 0, 0)
               - '#22C55E'
               legend_placement: bottom_left
               x_format: timestamp

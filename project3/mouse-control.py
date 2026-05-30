@@ -43,7 +43,6 @@ JOYSTICK_CENTER_V = 2.5
 DEFAULT_DEAD_ZONE_V = 0.2
 DEFAULT_MOUSE_SPEED = 80.0  # px/V
 DEFAULT_NEAR_CM = 15.0
-DEFAULT_FAR_CM = 22.0
 DEFAULT_STABLE_MS = 100.0
 
 
@@ -120,7 +119,7 @@ class MouseMapper:
 
 
 class ProximityClick:
-    """Fire one left-click per approach into the near zone (hysteresis + debounce)."""
+    """Fire one left-click per approach below the threshold (edge + debounce)."""
 
     def __init__(self) -> None:
         self._was_near = False
@@ -131,7 +130,6 @@ class ProximityClick:
         distance_cm: float,
         *,
         near_cm: float,
-        far_cm: float,
         stable_ms: float,
         now: float,
     ) -> bool:
@@ -140,18 +138,17 @@ class ProximityClick:
             return False
 
         near = distance_cm < near_cm
-        far = distance_cm > far_cm
 
         if near:
             if self._near_since is None:
                 self._near_since = now
             stable = (now - self._near_since) >= (stable_ms / 1000.0)
-            should_click = near and stable and not self._was_near
+            should_click = stable and not self._was_near
         else:
             self._near_since = None
             should_click = False
 
-        self._was_near = near if near else (self._was_near and not far)
+        self._was_near = near
         return should_click
 
 
@@ -301,15 +298,10 @@ class LabJackBench:
 
 
 def read_tuning(client: connect_python.Client) -> dict[str, float | bool]:
-    near_cm = as_float(client.get_value("near_cm"), DEFAULT_NEAR_CM)
-    far_cm = as_float(client.get_value("far_cm"), DEFAULT_FAR_CM)
-    if far_cm <= near_cm:
-        far_cm = near_cm + 2.0
     return {
         "dead_zone_v": as_float(client.get_value("dead_zone_v"), DEFAULT_DEAD_ZONE_V),
         "mouse_speed": as_float(client.get_value("mouse_speed"), DEFAULT_MOUSE_SPEED),
-        "near_cm": near_cm,
-        "far_cm": far_cm,
+        "near_cm": as_float(client.get_value("near_cm"), DEFAULT_NEAR_CM),
         "stable_ms": as_float(client.get_value("stable_ms"), DEFAULT_STABLE_MS),
     }
 
@@ -408,7 +400,6 @@ def main(client: connect_python.Client):
                     if proximity.update(
                         distance,
                         near_cm=float(tuning["near_cm"]),
-                        far_cm=float(tuning["far_cm"]),
                         stable_ms=float(tuning["stable_ms"]),
                         now=now,
                     ):
@@ -429,7 +420,14 @@ def main(client: connect_python.Client):
                     t,
                     channel_map={"value": vy, "dead_lo": dead_lo, "dead_hi": dead_hi},
                 )
-                client.stream("distance", t, distance, name="value", unit="cm")
+                client.stream_from_dict(
+                    "distance",
+                    t,
+                    channel_map={
+                        "value": distance,
+                        "click_threshold": float(tuning["near_cm"]),
+                    },
+                )
                 client.stream("mouse_dx", t, float(dx), name="value", unit="px")
                 client.stream("mouse_dy", t, float(dy), name="value", unit="px")
                 client.stream("click", t, click_value, name="value")
