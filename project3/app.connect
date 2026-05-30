@@ -23,7 +23,7 @@ streaming:
     unit: V
   - channel: distance.value
     unit: cm
-  - channel: system_on.value
+  - channel: mouse_control_on.value
   - channel: enable_out.value
   - channel: mouse_dx.value
     unit: px
@@ -43,32 +43,65 @@ on_unload: null
 tiles:
 - layout: tabs
   tabs:
-  - title: Sensors
+  - title: Home
     allow_popout: true
     tile:
       layout: grid
       rows:
-      - height: 0.4719693
+      - height: null
         columns:
-        - width: 0.33416766
+        - width: null
+          tile:
+            layout: pane
+            id: f1a2b3c4-d5e6-4789-a012-300000000010
+            title: Welcome
+            direction: vertical
+            should_fill: true
+            elements:
+            - display: markdown
+              path: instructions.md
+  - title: Live
+    allow_popout: true
+    tile:
+      layout: grid
+      rows:
+      - height: 0.38
+        columns:
+        - width: 1.0
+          tile:
+            layout: pane
+            id: f1a2b3c4-d5e6-4789-a012-300000000001
+            title: Sensors — start / stop
+            direction: vertical
+            should_fill: true
+            elements:
+            - controls: script_table
+              scripts:
+              - id: mouse-control
+                label: Project 3 — Mouse control
+                path: /Users/aarondiamond-reivich/Nominal/projects/project3/mouse-control.py
+                args: []
+                max_log_lines: 10000
+              show_output_column: true
+        - width: 1.0
           tile:
             layout: pane
             id: f1a2b3c4-d5e6-4789-a012-300000000002
-            title: Controls
+            title: Mouse control
             direction: vertical
             should_fill: true
             elements:
             - id: null
               spacing: normal
               inputs:
-              - input: checkbox
-                id: system_on
-                label: System on
+              - input: toggle_switch
+                id: mouse_control_on
+                label: Mouse control on
                 on_toggle_action:
                 - _kind: message
-                  topic: script/project3/system_on
+                  topic: script/project3/mouse_control_on
                   contents:
-                    enabled: $system_on
+                    enabled: $mouse_control_on
               - input: slider
                 id: mouse_speed
                 label: Mouse speed (px/V)
@@ -103,42 +136,7 @@ tiles:
                 value: 100
                 min: 0
                 max: 500
-        - width: 0.6694406
-          tile:
-            layout: pane
-            id: f1a2b3c4-d5e6-4789-a012-300000000001
-            title: Script Controls
-            direction: vertical
-            should_fill: true
-            elements:
-            - controls: script_table
-              scripts:
-              - id: mouse-control
-                label: Project 3 — Mouse control
-                path: /Users/aarondiamond-reivich/Nominal/projects/project3/mouse-control.py
-                args: []
-                max_log_lines: 10000
-              show_output_column: true
-        - width: 1.996392
-          tile:
-            layout: pane
-            id: f1a2b3c4-d5e6-4789-a012-300000000003
-            title: Test Workflow
-            direction: vertical
-            should_fill: true
-            elements:
-            - controls: test_workflow
-              label: null
-              script:
-                id: mouse-tests
-                label: Mouse Tests
-                path: /Users/aarondiamond-reivich/Nominal/projects/project3/mouse_tests.py
-                args: []
-                max_log_lines: 10000
-              output_table:
-                location: bottom
-                columns: []
-      - height: 0.37169078
+      - height: 0.32
         columns:
         - width: 1.0
           tile:
@@ -176,7 +174,7 @@ tiles:
               x_time_display: Local
               x_scale: linear
               y_scale: linear
-      - height: 0.45
+      - height: 0.3
         columns:
         - width: 1.0
           tile:
@@ -200,12 +198,12 @@ tiles:
           tile:
             layout: pane
             id: f1a2b3c4-d5e6-4789-a012-300000000007
-            title: System on / enable
+            title: Mouse control on / enable
             direction: vertical
             should_fill: true
             elements:
             - plot: line
-              stream_id: system_on
+              stream_id: mouse_control_on
               channels:
               - value
               colors: []
@@ -214,7 +212,7 @@ tiles:
               x_time_display: Local
               x_scale: linear
               y_scale: linear
-      - height: 0.35
+      - height: 0.25
         columns:
         - width: 1.0
           tile:
@@ -252,6 +250,34 @@ tiles:
               x_time_display: Local
               x_scale: linear
               y_scale: linear
+  - title: Tests
+    allow_popout: true
+    tile:
+      layout: grid
+      rows:
+      - height: null
+        columns:
+        - width: null
+          tile:
+            layout: pane
+            id: f1a2b3c4-d5e6-4789-a012-300000000003
+            title: Test Workflow
+            direction: vertical
+            should_fill: true
+            elements:
+            - display: markdown
+              path: test_instructions.md
+            - controls: test_workflow
+              label: null
+              script:
+                id: mouse-tests
+                label: Mouse Tests
+                path: /Users/aarondiamond-reivich/Nominal/projects/project3/mouse_tests.py
+                args: []
+                max_log_lines: 10000
+              output_table:
+                location: bottom
+                columns: []
 left_panel: null
 right_panel: null
 bottom_panel: null

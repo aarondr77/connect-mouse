@@ -5,8 +5,9 @@ Wiring: see project3/README.md
   - LabJack AIN0/AIN1 ← VRx/VRy; FIO4 → Arduino D2 (enable); FIO5/FIO6 ← HC-SR04
   - Arduino runs sensor_node.ino for enable LED only (no USB telemetry)
 
-When System on is armed, joystick voltages move the Mac cursor and proximity
-triggers debounced left-clicks. Tune live via Connect UI sliders.
+While the script runs, sensor data always streams. Toggle mouse_control_on in
+Connect to arm FIO4, move the cursor, and fire proximity left-clicks.
+Tune live via Connect UI sliders.
 """
 
 from __future__ import annotations
@@ -23,7 +24,7 @@ logger = connect_python.get_logger(__name__)
 ENABLE_LABJACK_LINE = "FIO4"
 TRIG_LINE = "FIO5"
 ECHO_LINE = "FIO6"
-SYSTEM_ON_TOPIC = "script/project3/system_on"
+MOUSE_CONTROL_TOPIC = "script/project3/mouse_control_on"
 
 # Bench wiring: VRx (stick left/right) → AIN1, VRy (stick up/down) → AIN0.
 JOYSTICK_X_CHANNEL = "AIN1"
@@ -64,11 +65,13 @@ def as_float(value: Any, default: float) -> float:
         return default
 
 
-def system_on_from_message(contents: dict[str, Any], current: bool) -> bool:
+def bool_from_message(
+    contents: dict[str, Any], current: bool, *, widget_id: str
+) -> bool:
     for key in ("enabled", "checked", "on", "value"):
         if key in contents:
             return as_bool(contents[key], current)
-    if contents.get("widget_id") == "system_on":
+    if contents.get("widget_id") == widget_id:
         return not current
     return current
 
@@ -283,7 +286,7 @@ def main(client: connect_python.Client):
     proximity = ProximityClick()
 
     stream_names = [
-        "system_on",
+        "mouse_control_on",
         "enable_out",
         "joystick_x",
         "joystick_y",
@@ -299,24 +302,26 @@ def main(client: connect_python.Client):
     last_enable: int | None = None
     start = time.monotonic()
     sample_count = 0
-    system_on = False
+    mouse_control_on = False
 
     try:
         with connect_python.MessageBus(client) as message_bus:
-            message_bus.subscribe_to_topic(SYSTEM_ON_TOPIC)
+            message_bus.subscribe_to_topic(MOUSE_CONTROL_TOPIC)
 
             while time.monotonic() - start < DURATION_SECONDS:
                 message = message_bus.try_receive_message()
                 while message is not None:
-                    if message.topic.startswith(SYSTEM_ON_TOPIC):
-                        system_on = system_on_from_message(message.contents, system_on)
+                    if message.topic.startswith(MOUSE_CONTROL_TOPIC):
+                        mouse_control_on = bool_from_message(
+                            message.contents, mouse_control_on, widget_id="mouse_control_on"
+                        )
                     message = message_bus.try_receive_message()
 
-                ui_value = client.get_value("system_on")
+                ui_value = client.get_value("mouse_control_on")
                 if ui_value is not None:
-                    system_on = as_bool(ui_value, system_on)
+                    mouse_control_on = as_bool(ui_value, mouse_control_on)
 
-                enable_bit = 1 if system_on else 0
+                enable_bit = 1 if mouse_control_on else 0
                 if enable_bit != last_enable:
                     labjack.set_enable(bool(enable_bit))
                     last_enable = enable_bit
@@ -341,7 +346,7 @@ def main(client: connect_python.Client):
                     else 0.0
                 )
                 click_value = 0.0
-                if system_on:
+                if mouse_control_on:
                     if dx != 0 or dy != 0:
                         mouse.move(dx, dy)
                     if proximity.update(
@@ -356,7 +361,7 @@ def main(client: connect_python.Client):
                         logger.info("Proximity click (distance=%.1f cm)", distance)
 
                 t = datetime.now(timezone.utc)
-                client.stream("system_on", t, float(enable_bit), name="value")
+                client.stream("mouse_control_on", t, float(enable_bit), name="value")
                 client.stream("enable_out", t, float(enable_bit), name="value")
                 client.stream("joystick_x", t, vx, name="value", unit="V")
                 client.stream("joystick_y", t, vy, name="value", unit="V")

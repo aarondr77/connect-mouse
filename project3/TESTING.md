@@ -39,7 +39,7 @@ If the run finishes instantly with only `Starting script`, Connect is pointing a
 
 ## Mouse control script
 
-1. Open [`app.connect`](app.connect) in Nominal Connect.
+1. Open [`app.connect`](app.connect) in Nominal Connect → **Live** tab.
 2. Run **Project 3 — Mouse control**.
 3. Move the joystick and wave a hand in front of the HC-SR04 — **joystick_x**, **joystick_y**, and **distance** plots should update.
 
@@ -53,13 +53,13 @@ Before cursor/click work, grant **Accessibility** permission:
 
 ### Manual mouse + click checklist
 
-1. Run the script; confirm sensor plots live.
-2. Leave **System on** unchecked — move stick and wave hand → **no** cursor move or Mac click; plots still update.
-3. Check **System on** — move stick → cursor moves; centered stick stops movement.
+1. Run the script on the **Live** tab; confirm sensor plots live.
+2. Leave **Mouse control on** off — move stick and wave hand → **no** cursor move or Mac click; plots still update.
+3. Turn **Mouse control on** — move stick → cursor moves; centered stick stops movement.
 4. Adjust **Mouse speed (px/V)** (default 80) and **Dead zone (V)** sliders live — feel changes without restart.
 5. Wave hand into ultrasonic range → one left-click per approach; **click** plot spikes to 1.
 6. Tune **Near/Far threshold** and **Click stable (ms)** if you get double-clicks or misses.
-7. Uncheck **System on** → cursor and clicks stop; Arduino LED blinks again.
+7. Turn **Mouse control on** off → cursor and clicks stop; Arduino LED blinks again.
 
 Connect UI tuning widgets (read live by the script):
 
