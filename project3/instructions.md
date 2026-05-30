@@ -13,9 +13,9 @@ Control the Mac cursor with a **joystick** and left-click via **ultrasonic proxi
 ## Quick start
 
 1. Open **Live** → click **Run** on *Project 3 — Mouse control* (streams sensors; mouse stays off).
-2. Move the stick and wave a hand — confirm plots update.
+2. Move the stick and wave a hand — confirm plots update (joystick volts, **mouse dx/dy**, distance).
 3. Flip **Mouse control on** when you want cursor movement and proximity clicks.
-4. Tune speed, dead zone, and click thresholds with the sliders (live, no restart).
+4. Tune speed, dead zone, and click thresholds with the sliders (live, no restart). Joystick plots show **dead_lo** / **dead_hi** lines that track the dead-zone slider (2.5 V ± dead zone).
 
 **Emergency off:** While the script is running, press **⌘⇧M** (Cmd+Shift+M) to turn off mouse control immediately — useful if the cursor drifts and you cannot click the toggle.
 

@@ -40,7 +40,7 @@ DISTANCE_MIN_CM = 2.0
 DISTANCE_MAX_CM = 400.0
 
 JOYSTICK_CENTER_V = 2.5
-DEFAULT_DEAD_ZONE_V = 0.25
+DEFAULT_DEAD_ZONE_V = 0.2
 DEFAULT_MOUSE_SPEED = 80.0  # px/V
 DEFAULT_NEAR_CM = 15.0
 DEFAULT_FAR_CM = 22.0
@@ -83,6 +83,14 @@ def is_valid_distance_cm(value: float) -> bool:
     return math.isfinite(value) and DISTANCE_MIN_CM <= value <= DISTANCE_MAX_CM
 
 
+def dead_zone_bounds(
+    dead_zone_v: float, center_v: float = JOYSTICK_CENTER_V
+) -> tuple[float, float]:
+    """Lower/upper voltage limits of the no-move band (for plot reference lines)."""
+    dz = max(0.0, dead_zone_v)
+    return center_v - dz, center_v + dz
+
+
 class MouseMapper:
     """Map joystick voltages to relative cursor pixel deltas."""
 
@@ -96,12 +104,10 @@ class MouseMapper:
         *,
         dead_zone_v: float,
         mouse_speed: float,
-        invert_y: bool,
     ) -> tuple[int, int]:
         dx = self._axis_delta(vx, dead_zone_v, mouse_speed)
-        dy = self._axis_delta(vy, dead_zone_v, mouse_speed)
-        if invert_y:
-            dy = -dy
+        # Bench VRy: higher voltage when stick is up → negative screen dy (cursor up).
+        dy = -self._axis_delta(vy, dead_zone_v, mouse_speed)
         return dx, dy
 
     def _axis_delta(self, voltage: float, dead_zone_v: float, mouse_speed: float) -> int:
@@ -302,7 +308,6 @@ def read_tuning(client: connect_python.Client) -> dict[str, float | bool]:
     return {
         "dead_zone_v": as_float(client.get_value("dead_zone_v"), DEFAULT_DEAD_ZONE_V),
         "mouse_speed": as_float(client.get_value("mouse_speed"), DEFAULT_MOUSE_SPEED),
-        "invert_y": as_bool(client.get_value("invert_y"), True),
         "near_cm": near_cm,
         "far_cm": far_cm,
         "stable_ms": as_float(client.get_value("stable_ms"), DEFAULT_STABLE_MS),
@@ -380,12 +385,14 @@ def main(client: connect_python.Client):
                 vx, vy = labjack.read_joystick_volts()
                 distance = labjack.read_distance_cm()
 
+                dead_zone_v = float(tuning["dead_zone_v"])
+                dead_lo, dead_hi = dead_zone_bounds(dead_zone_v)
+
                 dx, dy = mapper.deltas(
                     vx,
                     vy,
-                    dead_zone_v=float(tuning["dead_zone_v"]),
+                    dead_zone_v=dead_zone_v,
                     mouse_speed=float(tuning["mouse_speed"]),
-                    invert_y=bool(tuning["invert_y"]),
                 )
 
                 now = time.monotonic()
@@ -413,8 +420,16 @@ def main(client: connect_python.Client):
                 t = datetime.now(timezone.utc)
                 client.stream("mouse_control_on", t, float(enable_bit), name="value")
                 client.stream("enable_out", t, float(enable_bit), name="value")
-                client.stream("joystick_x", t, vx, name="value", unit="V")
-                client.stream("joystick_y", t, vy, name="value", unit="V")
+                client.stream_from_dict(
+                    "joystick_x",
+                    t,
+                    channel_map={"value": vx, "dead_lo": dead_lo, "dead_hi": dead_hi},
+                )
+                client.stream_from_dict(
+                    "joystick_y",
+                    t,
+                    channel_map={"value": vy, "dead_lo": dead_lo, "dead_hi": dead_hi},
+                )
                 client.stream("distance", t, distance, name="value", unit="cm")
                 client.stream("mouse_dx", t, float(dx), name="value", unit="px")
                 client.stream("mouse_dy", t, float(dy), name="value", unit="px")

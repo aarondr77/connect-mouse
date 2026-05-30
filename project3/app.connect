@@ -19,7 +19,15 @@ streaming:
   channels:
   - channel: joystick_x.value
     unit: V
+  - channel: joystick_x.dead_lo
+    unit: V
+  - channel: joystick_x.dead_hi
+    unit: V
   - channel: joystick_y.value
+    unit: V
+  - channel: joystick_y.dead_lo
+    unit: V
+  - channel: joystick_y.dead_hi
     unit: V
   - channel: distance.value
     unit: cm
@@ -46,26 +54,20 @@ tiles:
   - title: Home
     allow_popout: true
     tile:
-      layout: grid
-      rows:
-      - height: null
-        columns:
-        - width: null
-          tile:
-            layout: pane
-            id: f1a2b3c4-d5e6-4789-a012-300000000010
-            title: Welcome
-            direction: vertical
-            should_fill: true
-            elements:
-            - display: markdown
-              path: instructions.md
+      layout: pane
+      id: f1a2b3c4-d5e6-4789-a012-300000000010
+      title: Welcome
+      direction: vertical
+      should_fill: true
+      elements:
+      - display: markdown
+        path: instructions.md
   - title: Live
     allow_popout: true
     tile:
       layout: grid
       rows:
-      - height: 0.38
+      - height: 0.28803244
         columns:
         - width: 1.0
           tile:
@@ -77,11 +79,11 @@ tiles:
             elements:
             - controls: script_table
               scripts:
-              - id: mouse-control
-                label: Project 3 — Mouse control
+              - label: Project 3 — Mouse control
                 path: /Users/aarondiamond-reivich/Nominal/projects/project3/mouse-control.py
                 args: []
                 max_log_lines: 10000
+                id: mouse-control
               show_output_column: true
         - width: 1.0
           tile:
@@ -102,41 +104,37 @@ tiles:
                   topic: script/project3/mouse_control_on
                   contents:
                     enabled: $mouse_control_on
-              - input: slider
+              - input: number
                 id: mouse_speed
                 label: Mouse speed (px/V)
-                value: 80
-                min: 10
-                max: 300
-              - input: slider
+                default: 80.0
+                min: 10.0
+                max: 300.0
+              - input: number
                 id: dead_zone_v
                 label: Dead zone (V)
-                value: 0.25
+                default: 0.3
                 min: 0.05
                 max: 0.8
-              - input: checkbox
-                id: invert_y
-                label: Invert Y
-                value: true
-              - input: slider
+              - input: number
                 id: near_cm
                 label: Near threshold (cm)
-                value: 15
-                min: 5
-                max: 40
-              - input: slider
+                default: 0.0
+                min: 5.0
+                max: 40.0
+              - input: number
                 id: far_cm
                 label: Far threshold (cm)
-                value: 22
-                min: 10
-                max: 60
-              - input: slider
+                default: 0.0
+                min: 10.0
+                max: 60.0
+              - input: number
                 id: stable_ms
                 label: Click stable (ms)
-                value: 100
-                min: 0
-                max: 500
-      - height: 0.32
+                default: 0.0
+                min: 0.0
+                max: 500.0
+      - height: 0.40196756
         columns:
         - width: 1.0
           tile:
@@ -150,7 +148,12 @@ tiles:
               stream_id: joystick_x
               channels:
               - value
-              colors: []
+              - dead_lo
+              - dead_hi
+              colors:
+              - rgb(0, 0, 0)
+              - rgb(0, 0, 0)
+              - rgb(59, 130, 246)
               legend_placement: bottom_left
               x_format: timestamp
               x_time_display: Local
@@ -168,13 +171,48 @@ tiles:
               stream_id: joystick_y
               channels:
               - value
-              colors: []
+              - dead_lo
+              - dead_hi
+              colors:
+              - rgb(0, 0, 0)
+              - rgb(0, 0, 0)
+              - rgb(59, 130, 246)
               legend_placement: bottom_left
               x_format: timestamp
               x_time_display: Local
               x_scale: linear
               y_scale: linear
-      - height: 0.3
+        - width: 1.0
+          tile:
+            layout: pane
+            id: f1a2b3c4-d5e6-4789-a012-30000000000a
+            title: Mouse dx / dy (px)
+            direction: vertical
+            should_fill: true
+            elements:
+            - plot: line
+              stream_id: mouse_dx
+              channels:
+              - value
+              colors:
+              - '#3B82F6'
+              legend_placement: bottom_left
+              x_format: timestamp
+              x_time_display: Local
+              x_scale: linear
+              y_scale: linear
+            - plot: line
+              stream_id: mouse_dy
+              channels:
+              - value
+              colors:
+              - '#3B82F6'
+              legend_placement: bottom_left
+              x_format: timestamp
+              x_time_display: Local
+              x_scale: linear
+              y_scale: linear
+      - height: 0.31
         columns:
         - width: 1.0
           tile:
@@ -188,45 +226,8 @@ tiles:
               stream_id: distance
               channels:
               - value
-              colors: []
-              legend_placement: bottom_left
-              x_format: timestamp
-              x_time_display: Local
-              x_scale: linear
-              y_scale: linear
-        - width: 1.0
-          tile:
-            layout: pane
-            id: f1a2b3c4-d5e6-4789-a012-300000000007
-            title: Mouse control on / enable
-            direction: vertical
-            should_fill: true
-            elements:
-            - plot: line
-              stream_id: mouse_control_on
-              channels:
-              - value
-              colors: []
-              legend_placement: bottom_left
-              x_format: timestamp
-              x_time_display: Local
-              x_scale: linear
-              y_scale: linear
-      - height: 0.25
-        columns:
-        - width: 1.0
-          tile:
-            layout: pane
-            id: f1a2b3c4-d5e6-4789-a012-300000000008
-            title: Click
-            direction: vertical
-            should_fill: true
-            elements:
-            - plot: line
-              stream_id: click
-              channels:
-              - value
-              colors: []
+              colors:
+              - '#22C55E'
               legend_placement: bottom_left
               x_format: timestamp
               x_time_display: Local
@@ -244,7 +245,27 @@ tiles:
               stream_id: near_state
               channels:
               - value
-              colors: []
+              colors:
+              - '#22C55E'
+              legend_placement: bottom_left
+              x_format: timestamp
+              x_time_display: Local
+              x_scale: linear
+              y_scale: linear
+        - width: 1.0
+          tile:
+            layout: pane
+            id: f1a2b3c4-d5e6-4789-a012-300000000008
+            title: Click
+            direction: vertical
+            should_fill: true
+            elements:
+            - plot: line
+              stream_id: click
+              channels:
+              - value
+              colors:
+              - '#22C55E'
               legend_placement: bottom_left
               x_format: timestamp
               x_time_display: Local
@@ -255,7 +276,7 @@ tiles:
     tile:
       layout: grid
       rows:
-      - height: null
+      - height: 0.06490871
         columns:
         - width: null
           tile:
@@ -270,11 +291,11 @@ tiles:
             - controls: test_workflow
               label: null
               script:
-                id: mouse-tests
                 label: Mouse Tests
                 path: /Users/aarondiamond-reivich/Nominal/projects/project3/mouse_tests.py
                 args: []
                 max_log_lines: 10000
+                id: mouse-tests
               output_table:
                 location: bottom
                 columns: []

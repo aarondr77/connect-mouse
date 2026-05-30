@@ -66,8 +66,8 @@ Connect UI tuning widgets (read live by the script):
 | Widget id | Default | Purpose |
 |-----------|---------|---------|
 | `mouse_speed` | 80 px/V | Cursor speed |
-| `dead_zone_v` | 0.25 V | Ignore stick noise near center |
-| `invert_y` | on | Stick up → cursor up |
+| `dead_zone_v` | 0.2 V | Ignore stick noise near center |
+| Y axis | (fixed in script) | Stick up → cursor up |
 | `near_cm` | 15 cm | Enter proximity zone |
 | `far_cm` | 22 cm | Leave proximity zone (hysteresis) |
 | `stable_ms` | 100 ms | Hold near before click fires |
