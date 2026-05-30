@@ -82,7 +82,7 @@ tiles:
             - controls: script_table
               scripts:
               - label: Project 3 — Mouse control
-                path: /Users/aarondiamond-reivich/Nominal/projects/project3/mouse-control.py
+                path: /Users/aarondiamond-reivich/Nominal/projects/project3_connect/mouse-control.py
                 args: []
                 max_log_lines: 10000
                 id: mouse-control
@@ -191,7 +191,7 @@ tiles:
               channels:
               - value
               colors:
-              - '#3B82F6'
+              - rgb(59, 130, 246)
               legend_placement: bottom_left
               x_format: timestamp
               x_time_display: Local
@@ -202,7 +202,7 @@ tiles:
               channels:
               - value
               colors:
-              - '#3B82F6'
+              - rgb(59, 130, 246)
               legend_placement: bottom_left
               x_format: timestamp
               x_time_display: Local
@@ -225,7 +225,7 @@ tiles:
               - click_threshold
               colors:
               - rgb(0, 0, 0)
-              - '#22C55E'
+              - rgb(34, 197, 94)
               legend_placement: bottom_left
               x_format: timestamp
               x_time_display: Local
@@ -244,7 +244,7 @@ tiles:
               channels:
               - value
               colors:
-              - '#22C55E'
+              - rgb(34, 197, 94)
               legend_placement: bottom_left
               x_format: timestamp
               x_time_display: Local
@@ -263,40 +263,44 @@ tiles:
               channels:
               - value
               colors:
-              - '#22C55E'
+              - rgb(34, 197, 94)
               legend_placement: bottom_left
               x_format: timestamp
               x_time_display: Local
               x_scale: linear
               y_scale: linear
-  - title: Tests
-    allow_popout: true
-    tile:
-      layout: grid
-      rows:
-      - height: 0.06490871
+      - height: null
         columns:
         - width: null
           tile:
             layout: pane
-            id: f1a2b3c4-d5e6-4789-a012-300000000003
-            title: Test Workflow
+            id: 4c10733e-658e-4287-9e31-92a6b0e6395c
+            title: Gauge
             direction: vertical
             should_fill: true
-            elements:
-            - display: markdown
-              path: test_instructions.md
-            - controls: test_workflow
-              label: null
-              script:
-                label: Mouse Tests
-                path: /Users/aarondiamond-reivich/Nominal/projects/project3/mouse_tests.py
-                args: []
-                max_log_lines: 10000
-                id: mouse-tests
-              output_table:
-                location: bottom
-                columns: []
+            elements: []
+  - title: Tests
+    allow_popout: true
+    tile:
+      layout: pane
+      id: f1a2b3c4-d5e6-4789-a012-300000000003
+      title: Test Workflow
+      direction: vertical
+      should_fill: true
+      elements:
+      - display: markdown
+        path: test_instructions.md
+      - controls: test_workflow
+        label: null
+        script:
+          label: Mouse Tests
+          path: /Users/aarondiamond-reivich/Nominal/projects/project3_connect/mouse_tests.py
+          args: []
+          max_log_lines: 10000
+          id: mouse-tests
+        output_table:
+          location: bottom
+          columns: []
 left_panel: null
 right_panel: null
 bottom_panel: null

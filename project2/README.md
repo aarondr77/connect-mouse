@@ -613,7 +613,7 @@ When finished, **stop** the script in Connect. The script sets **FIO4 LOW** so t
 - Command hardware from Nominal Connect (`system_on` → FIO4)  
 - Stream telemetry (`joystick_voltage`) to verify behavior  
 
-**Next ideas:** run **`plant_tests.py`** as a Test Workflow ([TESTING.md](./TESTING.md)); see **[Project 3 plan](../project3/README.md)** for joystick mouse + ultrasonic click.
+**Next ideas:** run **`plant_tests.py`** as a Test Workflow ([TESTING.md](./TESTING.md)); see **[Project 3 plan](../project3_connect/README.md)** for joystick mouse + ultrasonic click.
 
 ---
 
